@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply antialiased bg-ink-950 text-ink-50;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+  }
+  /* 自定义滚动条 */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+  /* 选中文字颜色 */
+  ::selection {
+    background: rgb(16 185 129 / 0.25);
+    color: #fff;
+  }
+}
+
+@layer components {
+  /* 容器 / 卡片 */
+  .surface {
+    @apply bg-ink-900/60 backdrop-blur-xl border border-white/[0.06];
+  }
+  .surface-hover {
+    @apply hover:bg-ink-900/80 hover:border-white/[0.08] transition-colors;
+  }
+
+  /* 按钮 */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-medium
+           transition-all duration-150 active:scale-[0.98]
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/50;
+  }
+  .btn-primary {
+    @apply btn bg-accent-500 text-ink-950 hover:bg-accent-400 shadow-soft;
+  }
+  .btn-secondary {
+    @apply btn bg-ink-50 text-ink-950 hover:bg-ink-200;
+  }
+  .btn-ghost {
+    @apply btn bg-ink-900/60 text-ink-100 hover:bg-ink-800/80
+           border border-white/[0.06] hover:border-white/[0.10];
+  }
+  .btn-danger-ghost {
+    @apply btn bg-transparent text-ink-400 hover:text-rose-300 hover:bg-rose-500/10;
+  }
+
+  /* 输入框 */
+  .input {
+    @apply w-full rounded-lg bg-ink-900/60 border border-white/[0.06] px-4 py-3
+           text-ink-50 placeholder:text-ink-500
+           focus:outline-none focus:border-accent-500/60 focus:ring-2 focus:ring-accent-500/15
+           transition-all;
+  }
+
+  /* 徽章 */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-accent {
+    @apply badge bg-accent-500/10 text-accent-400 border border-accent-500/20;
+  }
+
+  /* 分隔线 */
+  .divider {
+    @apply border-t border-white/[0.06];
+  }
+}
+
+/* 极简点阵背景 */
+.bg-grid {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+/* 高亮重点文字（单色，无多彩渐变） */
+.text-accent {
+  @apply text-accent-400;
+}

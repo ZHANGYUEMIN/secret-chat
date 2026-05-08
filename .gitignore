@@ -1,0 +1,25 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript 增量编译产物
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+src/**/*.d.ts
+src/**/*.js
+
+# 临时文件
+.commit-msg.tmp
