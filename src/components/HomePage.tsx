@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Lock, ShieldCheck, Zap, Eye, ArrowRight, RefreshCw } from 'lucide-react'
 import { generateRoomId } from '../lib/crypto'
 import { MAX_GROUP_MEMBERS } from '../lib/group-peer'
@@ -21,6 +21,8 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
   const [chatMode, setChatMode] = useState<ChatMode>(initialChatKind)
   const [roomId, setRoomId] = useState(initialRoomId || generateRoomId())
   const [nickname, setNickname] = useState('')
+  const [nicknameError, setNicknameError] = useState<string | null>(null)
+  const nicknameInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (initialRoomId) {
@@ -30,9 +32,23 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
     }
   }, [initialRoomId, initialChatKind])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const n = nickname.trim() || (tab === 'create' ? '主持人' : '访客')
+  /**
+   * 必须从 input 的 DOM 读 value：部分浏览器自动填充不会触发 onChange，
+   * 仅用 React state 会误判为「空」或「有值」。
+   * 主按钮使用 type="button"，避免仅靠原生 submit 绕过我们的校验。
+   */
+  const attemptEnter = () => {
+    const el = nicknameInputRef.current
+    const raw = String(el?.value ?? nickname)
+    const n = raw.trim()
+    if (!n) {
+      setNickname(raw)
+      setNicknameError('请先输入昵称')
+      el?.focus()
+      return
+    }
+    setNicknameError(null)
+    setNickname(n)
     const r = roomId.trim().toLowerCase()
     if (!r) return
     onEnter({
@@ -41,6 +57,11 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
       nickname: n,
       chatMode,
     })
+  }
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    attemptEnter()
   }
 
   return (
@@ -107,7 +128,10 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
           <div className="surface rounded-xl p-1 mb-2 grid grid-cols-2 gap-1">
             <button
               type="button"
-              onClick={() => setChatMode('dm')}
+              onClick={() => {
+                setChatMode('dm')
+                setNicknameError(null)
+              }}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                 chatMode === 'dm'
                   ? 'bg-ink-50 text-ink-950 shadow-soft'
@@ -118,7 +142,10 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
             </button>
             <button
               type="button"
-              onClick={() => setChatMode('group')}
+              onClick={() => {
+                setChatMode('group')
+                setNicknameError(null)
+              }}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                 chatMode === 'group'
                   ? 'bg-ink-50 text-ink-950 shadow-soft'
@@ -138,7 +165,10 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
           <div className="surface rounded-xl p-1 mb-3 grid grid-cols-2 gap-1">
             <button
               type="button"
-              onClick={() => setTab('create')}
+              onClick={() => {
+                setTab('create')
+                setNicknameError(null)
+              }}
               className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 tab === 'create'
                   ? 'bg-ink-50 text-ink-950 shadow-soft'
@@ -149,7 +179,10 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
             </button>
             <button
               type="button"
-              onClick={() => setTab('join')}
+              onClick={() => {
+                setTab('join')
+                setNicknameError(null)
+              }}
               className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 tab === 'join'
                   ? 'bg-ink-50 text-ink-950 shadow-soft'
@@ -162,21 +195,46 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
 
           {/* 表单 */}
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleFormSubmit}
             className="surface rounded-xl p-5 sm:p-6 space-y-4 animate-slide-up"
           >
             <div>
               <label className="block text-[11px] font-medium uppercase tracking-wider text-ink-500 mb-2">
-                昵称
+                昵称 <span className="text-rose-400/90">*</span>
               </label>
               <input
+                ref={nicknameInputRef}
                 type="text"
+                name="secretchat_display_name"
                 value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder={tab === 'create' ? (chatMode === 'group' ? '主持人' : '我') : '访客'}
-                className="input"
+                onChange={(e) => {
+                  setNickname(e.target.value)
+                  setNicknameError(null)
+                }}
+                placeholder={
+                  tab === 'create'
+                    ? chatMode === 'group'
+                      ? '例如：主持人小王'
+                      : '例如：小明'
+                    : '例如：访客小李'
+                }
+                className={`input ${nicknameError ? 'border-rose-500/60 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
                 maxLength={20}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                data-1p-ignore
+                data-lpignore="true"
+                data-form-type="other"
+                aria-invalid={nicknameError ? true : undefined}
+                aria-describedby={nicknameError ? 'nickname-hint' : undefined}
               />
+              {nicknameError && (
+                <p id="nickname-hint" className="text-rose-400 text-xs mt-2" role="alert">
+                  {nicknameError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -207,7 +265,11 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
               />
             </div>
 
-            <button type="submit" className="btn-primary w-full text-[15px] py-3 mt-2">
+            <button
+              type="button"
+              className="btn-primary w-full text-[15px] py-3 mt-2"
+              onClick={() => attemptEnter()}
+            >
               {tab === 'create'
                 ? chatMode === 'group'
                   ? '创建加密群'
