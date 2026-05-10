@@ -25,7 +25,7 @@ export function MessageBubble({ msg, myNickname, peerNickname }: Props) {
   const bubbleColor = fromMe
     ? 'bg-accent-500 text-ink-950'
     : 'bg-ink-900/80 text-ink-50 border border-white/[0.06]'
-  const name = fromMe ? myNickname || '我' : peerNickname || '对方'
+  const name = fromMe ? myNickname || '我' : msg.senderLabel || peerNickname || '对方'
 
   return (
     <li className={`flex flex-col ${align} gap-1 animate-slide-up`}>

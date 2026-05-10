@@ -10,7 +10,7 @@ import {
   Loader2,
   AlertCircle,
 } from 'lucide-react'
-import type { UseChatActions, UseChatState } from '../hooks/useChat'
+import type { ChatMode, UseChatActions, UseChatState } from '../hooks/useChat'
 import { buildShareLink, copyText } from '../lib/utils'
 import { MessageBubble } from './MessageBubble'
 
@@ -20,10 +20,11 @@ interface Props {
   roomId: string
   myNickname: string
   isHost: boolean
+  chatMode: ChatMode
   onLeave: () => void
 }
 
-export function ChatRoom({ state, actions, roomId, myNickname, isHost, onLeave }: Props) {
+export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode, onLeave }: Props) {
   const [draft, setDraft] = useState('')
   const [linkCopied, setLinkCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
@@ -37,7 +38,7 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, onLeave }
     const el = scrollRef.current
     if (!el) return
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
-  }, [state.messages.length, state.peerTyping])
+  }, [state.messages.length, state.peerTyping, state.typingPeers.join(',')])
 
   const handleSend = (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -62,7 +63,7 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, onLeave }
   }
 
   const copyLink = async () => {
-    const link = buildShareLink(roomId)
+    const link = buildShareLink(roomId, chatMode === 'group' ? 'group' : 'dm')
     if (await copyText(link)) {
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 1500)
@@ -107,11 +108,23 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, onLeave }
               }`}
             />
             <span className="font-medium text-[15px] truncate">
-              {isReady ? state.peerNickname || '对方' : isHost ? '等待对方加入' : '正在连接'}
+              {isReady
+                ? chatMode === 'group'
+                  ? `群聊 · ${state.members.length} 人`
+                  : state.peerNickname || '对方'
+                : isHost
+                  ? chatMode === 'group'
+                    ? '等待成员加入…'
+                    : '等待对方加入'
+                  : '正在连接'}
             </span>
           </div>
           <div className="text-[11px] text-ink-500 truncate">
-            {isReady ? '安全连接已建立 · 端到端加密' : state.statusInfo}
+            {isReady
+              ? chatMode === 'group'
+                ? '同一安全码 · 主持人仅转发密文'
+                : '安全连接已建立 · 端到端加密'
+              : state.statusInfo}
           </div>
         </div>
 
@@ -131,6 +144,26 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, onLeave }
           )}
         </button>
       </header>
+
+      {chatMode === 'group' && isReady && state.members.length > 0 && (
+        <div className="px-3 sm:px-5 py-2 border-b border-white/[0.06] bg-ink-950/50 overflow-x-auto">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[10px] text-ink-500 shrink-0 uppercase tracking-wider">成员</span>
+            <div className="flex flex-wrap gap-1.5">
+              {state.members.map((m) => (
+                <span
+                  key={m.id}
+                  className="badge-accent text-[10px] py-1 px-2 max-w-[120px] truncate"
+                  title={m.nickname}
+                >
+                  {m.nickname}
+                  {m.nickname === myNickname ? '（我）' : ''}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 错误条 */}
       {state.error && (
@@ -155,7 +188,9 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, onLeave }
                 <span className="font-mono font-semibold tracking-wider text-accent-200">
                   {state.securityCode}
                 </span>
-                <span className="text-ink-500 ml-2">（与对方核对一致即可）</span>
+                <span className="text-ink-500 ml-2">
+                  {chatMode === 'group' ? '（全员应显示相同安全码）' : '（与对方核对一致即可）'}
+                </span>
               </>
             ) : (
               <>已建立端到端加密连接 · 点此查看安全码</>
@@ -178,10 +213,13 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, onLeave }
 
       {/* 消息区 */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 sm:px-5 py-4">
-        {state.messages.length === 0 && !isConnecting && isReady && <EmptyHint />}
+        {state.messages.length === 0 && !isConnecting && isReady && (
+          <EmptyHint isGroup={chatMode === 'group'} />
+        )}
         {!isReady && isConnecting && (
           <ConnectingHint
             isHost={isHost}
+            isGroup={chatMode === 'group'}
             roomId={roomId}
             onCopyLink={copyLink}
             linkCopied={linkCopied}
@@ -197,9 +235,20 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, onLeave }
               peerNickname={state.peerNickname}
             />
           ))}
-          {state.peerTyping && isReady && (
+          {chatMode === 'dm' && state.peerTyping && isReady && (
             <li className="flex justify-start">
               <div className="bg-ink-900/80 border border-white/[0.06] rounded-2xl px-4 py-2.5 text-sm text-ink-400">
+                <TypingDots />
+              </div>
+            </li>
+          )}
+          {chatMode === 'group' && state.typingPeers.length > 0 && isReady && (
+            <li className="flex justify-start">
+              <div className="bg-ink-900/80 border border-white/[0.06] rounded-2xl px-4 py-2.5 text-sm text-ink-400">
+                <span className="text-ink-500 mr-2">
+                  {state.typingPeers.join('、')}
+                  {state.typingPeers.length ? ' 正在输入' : ''}
+                </span>
                 <TypingDots />
               </div>
             </li>
@@ -290,25 +339,31 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, onLeave }
   )
 }
 
-function EmptyHint() {
+function EmptyHint({ isGroup }: { isGroup: boolean }) {
   return (
     <div className="text-center py-12 text-ink-500 text-sm animate-fade-in">
       <div className="w-12 h-12 rounded-xl bg-accent-500/10 border border-accent-500/20 flex items-center justify-center mx-auto mb-3">
         <ShieldCheck className="w-6 h-6 text-accent-400" />
       </div>
-      <p className="text-ink-300">开始你的加密对话吧</p>
-      <p className="text-xs mt-1 text-ink-500">所有消息和文件仅在双方设备间直接传输</p>
+      <p className="text-ink-300">{isGroup ? '开始群聊吧' : '开始你的加密对话吧'}</p>
+      <p className="text-xs mt-1 text-ink-500">
+        {isGroup
+          ? '消息与文件经 AES 加密，由主持人转发密文，内容对信令服务不可读'
+          : '所有消息和文件仅在双方设备间直接传输'}
+      </p>
     </div>
   )
 }
 
 function ConnectingHint({
   isHost,
+  isGroup,
   roomId,
   onCopyLink,
   linkCopied,
 }: {
   isHost: boolean
+  isGroup: boolean
   roomId: string
   onCopyLink: () => void
   linkCopied: boolean
@@ -320,10 +375,22 @@ function ConnectingHint({
           <Loader2 className="w-6 h-6 text-accent-400 animate-spin" />
         </div>
         <h3 className="font-semibold text-base mb-1">
-          {isHost ? '等待对方加入' : '正在建立加密连接'}
+          {isHost
+            ? isGroup
+              ? '等待成员加入群聊'
+              : '等待对方加入'
+            : isGroup
+              ? '正在加入加密群聊'
+              : '正在建立加密连接'}
         </h3>
         <p className="text-sm text-ink-400 mb-5">
-          {isHost ? '把下面的房间号或链接发给对方' : '正在与对方协商密钥…'}
+          {isHost
+            ? isGroup
+              ? '把房间号或链接发给所有成员（每人用「加入群」）'
+              : '把下面的房间号或链接发给对方'
+            : isGroup
+              ? '正在与主持人协商密钥…'
+              : '正在与对方协商密钥…'}
         </p>
 
         {isHost && (

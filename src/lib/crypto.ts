@@ -21,6 +21,18 @@ const ECDH_PARAMS: EcKeyGenParams = {
 
 const AES_PARAMS = { name: 'AES-GCM', length: 256 } as const
 
+/** 从 32 字节原始密钥导入 AES-256-GCM（用于群聊：主持人分发同一把群密钥） */
+export async function importAes256RawKey(
+  raw: ArrayBuffer | Uint8Array,
+  extractable = false,
+): Promise<CryptoKey> {
+  const buf = raw instanceof Uint8Array ? raw : new Uint8Array(raw)
+  return crypto.subtle.importKey('raw', buf as BufferSource, AES_PARAMS, extractable, [
+    'encrypt',
+    'decrypt',
+  ])
+}
+
 /** 生成本端的 ECDH 密钥对 */
 export async function generateKeyPair(): Promise<CryptoKeyPair> {
   return crypto.subtle.generateKey(ECDH_PARAMS, true, ['deriveKey', 'deriveBits'])

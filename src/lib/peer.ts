@@ -42,6 +42,8 @@ export interface IncomingMessage {
   text: string
   ts: number
   fromMe: false
+  /** 群聊时发送者昵称 */
+  senderNickname?: string
 }
 
 export interface IncomingFileMeta {
@@ -51,6 +53,8 @@ export interface IncomingFileMeta {
   mime: string
   totalChunks: number
   ts: number
+  /** 群聊时发送者昵称 */
+  senderNickname?: string
 }
 
 export interface ChatHandlers {
@@ -62,7 +66,8 @@ export interface ChatHandlers {
   onFileProgress: (id: string, sent: number, total: number) => void
   onPeerNickname: (nickname: string) => void
   onSecurityCode: (code: string) => void
-  onTyping: (isTyping: boolean) => void
+  /** 群聊时 fromNickname 为对方昵称；一对一不传 */
+  onTyping: (isTyping: boolean, fromNickname?: string) => void
   onError: (err: string) => void
 }
 

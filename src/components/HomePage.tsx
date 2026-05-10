@@ -1,15 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Lock, ShieldCheck, Zap, Eye, ArrowRight, RefreshCw } from 'lucide-react'
 import { generateRoomId } from '../lib/crypto'
+import { MAX_GROUP_MEMBERS } from '../lib/group-peer'
+import type { ChatMode } from '../hooks/useChat'
 import { ParticleField } from './ParticleField'
 
 interface Props {
   initialRoomId?: string | null
-  onEnter: (params: { mode: 'host' | 'join'; roomId: string; nickname: string }) => void
+  initialChatKind?: ChatMode
+  onEnter: (params: {
+    mode: 'host' | 'join'
+    roomId: string
+    nickname: string
+    chatMode: ChatMode
+  }) => void
 }
 
-export function HomePage({ initialRoomId, onEnter }: Props) {
+export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Props) {
   const [tab, setTab] = useState<'create' | 'join'>(initialRoomId ? 'join' : 'create')
+  const [chatMode, setChatMode] = useState<ChatMode>(initialChatKind)
   const [roomId, setRoomId] = useState(initialRoomId || generateRoomId())
   const [nickname, setNickname] = useState('')
 
@@ -17,15 +26,21 @@ export function HomePage({ initialRoomId, onEnter }: Props) {
     if (initialRoomId) {
       setTab('join')
       setRoomId(initialRoomId)
+      setChatMode(initialChatKind)
     }
-  }, [initialRoomId])
+  }, [initialRoomId, initialChatKind])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const n = nickname.trim() || (tab === 'create' ? '主持人' : '访客')
     const r = roomId.trim().toLowerCase()
     if (!r) return
-    onEnter({ mode: tab === 'create' ? 'host' : 'join', roomId: r, nickname: n })
+    onEnter({
+      mode: tab === 'create' ? 'host' : 'join',
+      roomId: r,
+      nickname: n,
+      chatMode,
+    })
   }
 
   return (
@@ -88,6 +103,37 @@ export function HomePage({ initialRoomId, onEnter }: Props) {
             </p>
           </div>
 
+          {/* 模式：一对一 / 群聊 */}
+          <div className="surface rounded-xl p-1 mb-2 grid grid-cols-2 gap-1">
+            <button
+              type="button"
+              onClick={() => setChatMode('dm')}
+              className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                chatMode === 'dm'
+                  ? 'bg-ink-50 text-ink-950 shadow-soft'
+                  : 'text-ink-400 hover:text-ink-100'
+              }`}
+            >
+              一对一
+            </button>
+            <button
+              type="button"
+              onClick={() => setChatMode('group')}
+              className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                chatMode === 'group'
+                  ? 'bg-ink-50 text-ink-950 shadow-soft'
+                  : 'text-ink-400 hover:text-ink-100'
+              }`}
+            >
+              加密群聊
+            </button>
+          </div>
+          {chatMode === 'group' && (
+            <p className="text-[11px] text-ink-500 mb-3 text-center">
+              主持人转发密文 · 最多 {MAX_GROUP_MEMBERS} 人 · 全员同一套群密钥
+            </p>
+          )}
+
           {/* Tab 切换 */}
           <div className="surface rounded-xl p-1 mb-3 grid grid-cols-2 gap-1">
             <button
@@ -99,7 +145,7 @@ export function HomePage({ initialRoomId, onEnter }: Props) {
                   : 'text-ink-400 hover:text-ink-100'
               }`}
             >
-              创建房间
+              {chatMode === 'group' ? '创建群' : '创建房间'}
             </button>
             <button
               type="button"
@@ -110,7 +156,7 @@ export function HomePage({ initialRoomId, onEnter }: Props) {
                   : 'text-ink-400 hover:text-ink-100'
               }`}
             >
-              加入房间
+              {chatMode === 'group' ? '加入群' : '加入房间'}
             </button>
           </div>
 
@@ -127,7 +173,7 @@ export function HomePage({ initialRoomId, onEnter }: Props) {
                 type="text"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
-                placeholder={tab === 'create' ? '主持人' : '访客'}
+                placeholder={tab === 'create' ? (chatMode === 'group' ? '主持人' : '我') : '访客'}
                 className="input"
                 maxLength={20}
               />
@@ -162,7 +208,13 @@ export function HomePage({ initialRoomId, onEnter }: Props) {
             </div>
 
             <button type="submit" className="btn-primary w-full text-[15px] py-3 mt-2">
-              {tab === 'create' ? '创建房间' : '加入聊天'}
+              {tab === 'create'
+                ? chatMode === 'group'
+                  ? '创建加密群'
+                  : '创建房间'
+                : chatMode === 'group'
+                  ? '加入群聊'
+                  : '加入聊天'}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
