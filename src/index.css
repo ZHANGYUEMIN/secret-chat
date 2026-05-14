@@ -43,25 +43,94 @@
     @apply hover:bg-ink-900/80 hover:border-white/[0.08] transition-colors;
   }
 
-  /* 按钮 */
+  /* 按钮基类：触控优化、清晰焦点环 */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-medium
-           transition-all duration-150 active:scale-[0.98]
-           disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
-           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/50;
+    @apply inline-flex items-center justify-center gap-2 font-medium select-none touch-manipulation
+           transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out
+           active:scale-[0.97]
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none disabled:active:scale-100
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/55 focus-visible:ring-offset-2
+           focus-visible:ring-offset-ink-950 rounded-xl;
   }
+
   .btn-primary {
-    @apply btn bg-accent-500 text-ink-950 hover:bg-accent-400 shadow-soft;
+    @apply btn px-4 py-2.5 min-h-[44px] bg-accent-500 text-ink-950 font-semibold
+           hover:bg-accent-400
+           active:bg-accent-500/90
+           shadow-[0_1px_2px_rgba(0,0,0,0.45)]
+           hover:shadow-[0_0_0_1px_rgba(52,211,153,0.22),0_6px_28px_-8px_rgba(16,185,129,0.38)];
   }
+
+  /** 首页主操作：更大触控区与强调光晕 */
+  .btn-cta {
+    @apply btn-primary w-full min-h-[52px] text-[16px] tracking-tight
+           shadow-[0_1px_3px_rgba(0,0,0,0.5),0_8px_32px_-10px_rgba(16,185,129,0.42)]
+           hover:shadow-[0_0_0_1px_rgba(52,211,153,0.28),0_10px_36px_-8px_rgba(16,185,129,0.5)];
+  }
+
+  /** 方形图标主按钮（发送等） */
+  .btn-primary-icon {
+    @apply btn-primary min-w-[48px] min-h-[48px] !p-0 shrink-0;
+  }
+
   .btn-secondary {
-    @apply btn bg-ink-50 text-ink-950 hover:bg-ink-200;
+    @apply btn bg-ink-50 text-ink-950 hover:bg-ink-200 px-4 py-2.5 min-h-[44px];
   }
+
   .btn-ghost {
-    @apply btn bg-ink-900/60 text-ink-100 hover:bg-ink-800/80
-           border border-white/[0.06] hover:border-white/[0.10];
+    @apply btn bg-ink-900/60 text-ink-100 border border-white/[0.08] hover:bg-ink-800/85
+           hover:border-white/[0.12] px-4 py-2.5 min-h-[44px];
   }
+
+  .btn-ghost-sm {
+    @apply btn-ghost min-h-[40px] py-2 px-3 text-xs gap-1.5 rounded-lg;
+  }
+
+  /** 仅图标的幽灵按钮（附件、返回） */
+  .btn-ghost-icon {
+    @apply btn-ghost min-w-[48px] min-h-[48px] !p-0 text-ink-300 hover:text-ink-50;
+  }
+
   .btn-danger-ghost {
-    @apply btn bg-transparent text-ink-400 hover:text-rose-300 hover:bg-rose-500/10;
+    @apply btn bg-transparent text-ink-500 hover:text-rose-300 hover:bg-rose-500/10
+           border border-transparent px-3 py-2 min-h-[40px] rounded-lg;
+  }
+
+  /** 分段切换（一对一/群聊、创建/加入） */
+  .btn-seg {
+    @apply w-full font-medium transition-all duration-200 ease-out rounded-lg select-none touch-manipulation
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/45 focus-visible:ring-inset
+           active:scale-[0.98];
+  }
+  .btn-seg--on {
+    @apply bg-ink-50 text-ink-950 shadow-soft;
+  }
+  .btn-seg--off {
+    @apply text-ink-400 hover:text-ink-100 hover:bg-white/[0.06];
+  }
+  .btn-seg-sm {
+    @apply min-h-[40px] px-3 py-2 text-xs;
+  }
+  .btn-seg-md {
+    @apply min-h-[44px] px-4 py-2.5 text-sm;
+  }
+
+  /** 弱样式文字按钮（重新生成等） */
+  .btn-subtle {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 min-h-[36px]
+           text-[11px] font-medium text-ink-400 hover:text-accent-400 hover:bg-white/[0.06]
+           transition-colors
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:ring-offset-2
+           focus-visible:ring-offset-ink-950 active:scale-[0.98];
+  }
+
+  /** 顶栏返回等：无边框图标按钮 */
+  .btn-icon-plain {
+    @apply inline-flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl
+           text-ink-300 hover:bg-ink-800/85 hover:text-ink-50
+           transition-colors
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/45
+           focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 active:scale-[0.97];
   }
 
   /* 输入框 */

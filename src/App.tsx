@@ -59,12 +59,17 @@ export default function App() {
     nickname: string
     chatMode: ChatMode
   }) => {
-    setView({ name: 'chat', roomId, nickname, isHost: mode === 'host', chatMode })
+    const nick = nickname.trim()
+    if (!nick) {
+      window.alert('请先输入昵称')
+      return
+    }
+    setView({ name: 'chat', roomId, nickname: nick, isHost: mode === 'host', chatMode })
     if (mode === 'host') {
       window.location.hash = chatMode === 'group' ? `#/group/${roomId}` : `#/room/${roomId}`
-      await chat.host(roomId, nickname, chatMode)
+      await chat.host(roomId, nick, chatMode)
     } else {
-      await chat.join(roomId, nickname, chatMode)
+      await chat.join(roomId, nick, chatMode)
     }
   }
 

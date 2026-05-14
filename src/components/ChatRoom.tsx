@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Loader2,
   AlertCircle,
+  Info,
 } from 'lucide-react'
 import type { ChatMode, UseChatActions, UseChatState } from '../hooks/useChat'
 import { buildShareLink, copyText } from '../lib/utils'
@@ -88,13 +89,14 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
       {/* 顶部状态条 */}
       <header className="bg-ink-950/80 backdrop-blur-xl border-b border-white/[0.06] px-3 sm:px-5 py-3 flex items-center gap-3 z-10">
         <button
+          type="button"
           onClick={() => {
             if (confirm('离开会自动销毁所有消息，确定？')) {
               actions.disconnect()
               onLeave()
             }
           }}
-          className="p-2 rounded-lg hover:bg-ink-800/80 text-ink-300 transition-colors"
+          className="btn-icon-plain shrink-0"
           aria-label="返回"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -129,8 +131,9 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
         </div>
 
         <button
+          type="button"
           onClick={copyLink}
-          className="btn-ghost text-xs px-3 py-2"
+          className="btn-ghost-sm shrink-0"
           title="复制邀请链接"
         >
           {linkCopied ? (
@@ -266,8 +269,8 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={!isReady}
-            className="btn-ghost shrink-0 p-3"
-            title="发送文件"
+            className="btn-ghost-icon shrink-0"
+            title="发送文件（类型不限；建议单文件 ≤100MB）"
           >
             <Paperclip className="w-[18px] h-[18px]" />
           </button>
@@ -308,7 +311,7 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
           <button
             type="submit"
             disabled={!isReady || !draft.trim()}
-            className="btn-primary shrink-0 p-3"
+            className="btn-primary-icon shrink-0"
             aria-label="发送"
           >
             {isConnecting ? (
@@ -317,6 +320,33 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
               <Send className="w-[18px] h-[18px]" strokeWidth={2.25} />
             )}
           </button>
+        </div>
+
+        {/* 文件与存储说明（固定标注） */}
+        <div className="max-w-3xl mx-auto mt-3 rounded-lg border border-white/[0.08] bg-ink-900/50 px-3 py-2.5">
+          <div className="flex items-start gap-2">
+            <Info className="w-3.5 h-3.5 shrink-0 text-accent-400 mt-0.5" strokeWidth={2.25} />
+            <div className="min-w-0 space-y-1 text-[10px] sm:text-[11px] leading-relaxed text-ink-400">
+              <p>
+                <span className="font-semibold text-ink-300">类型</span>：不限制，任意格式均可选。
+              </p>
+              <p>
+                <span className="font-semibold text-ink-300">大小</span>：程序未设硬上限；建议单文件
+                <span className="text-accent-400/90 font-medium"> ≤100MB </span>
+                ，过大易失败或卡顿（取决于设备内存与网络）。
+              </p>
+              <p>
+                <span className="font-semibold text-ink-300">次数</span>：发送文件次数无硬上限；文件过多会占用大量内存、可能变慢。
+              </p>
+              <p>
+                <span className="font-semibold text-ink-300">离开本页</span>：仅清除
+                <span className="text-ink-200">浏览器内存里</span>
+                的对话与附件预览；若已点「下载」保存到磁盘，本地文件
+                <span className="text-ink-200">不会</span>
+                被自动删除。
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="max-w-3xl mx-auto mt-2 flex items-center justify-between text-[11px] text-ink-600">
@@ -350,6 +380,9 @@ function EmptyHint({ isGroup }: { isGroup: boolean }) {
         {isGroup
           ? '消息与文件经 AES 加密，由主持人转发密文，内容对信令服务不可读'
           : '所有消息和文件仅在双方设备间直接传输'}
+      </p>
+      <p className="text-[10px] mt-3 text-ink-600 max-w-xs mx-auto leading-relaxed">
+        附件说明见输入框下方「文件与存储说明」：类型不限、建议 ≤100MB、离开页面清除内存中的内容。
       </p>
     </div>
   )
