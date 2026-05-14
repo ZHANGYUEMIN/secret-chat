@@ -65,24 +65,22 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
   }
 
   return (
-    <div className="relative min-h-full flex flex-col bg-ink-950 bg-grid overflow-hidden">
-      {/* 粒子背景层 */}
-      <ParticleField className="opacity-90" />
-
-      {/* 柔光斑（绝对定位，烘托氛围，不抢眼） */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full blur-3xl opacity-[0.08]"
-        style={{ background: 'radial-gradient(closest-side, #10b981, transparent)' }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-32 -left-40 w-[500px] h-[500px] rounded-full blur-3xl opacity-[0.05]"
-        style={{ background: 'radial-gradient(closest-side, #ffffff, transparent)' }}
-      />
+    <div className="relative isolate flex min-h-full flex-col overflow-hidden bg-ink-950 bg-grid">
+      {/* 装饰层：整块不接收指针，避免盖住可点击区域 */}
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+        <ParticleField className="opacity-90" />
+        <div
+          className="pointer-events-none absolute -top-40 left-1/2 h-[700px] w-[700px] -translate-x-1/2 rounded-full opacity-[0.08] blur-3xl"
+          style={{ background: 'radial-gradient(closest-side, #10b981, transparent)' }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-32 -left-40 h-[500px] w-[500px] rounded-full opacity-[0.05] blur-3xl"
+          style={{ background: 'radial-gradient(closest-side, #ffffff, transparent)' }}
+        />
+      </div>
 
       {/* 顶部 logo */}
-      <header className="relative z-10 px-5 sm:px-8 py-5 flex items-center justify-between">
+      <header className="relative z-20 px-5 sm:px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-accent-500 flex items-center justify-center shadow-soft">
             <Lock className="w-[18px] h-[18px] text-ink-950" strokeWidth={2.5} />
@@ -96,7 +94,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
           href="https://github.com/ZHANGYUEMIN/secret-chat"
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-icon-plain text-ink-400 hover:text-ink-50"
+          className="sc-github-header"
           aria-label="在 GitHub 上查看源码"
           title="GitHub 源码仓库"
         >
@@ -105,7 +103,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
       </header>
 
       {/* 主体 */}
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
+      <main className="relative z-20 flex flex-1 items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           {/* 标题区 */}
           <div className="text-center mb-10 animate-fade-in">
@@ -134,7 +132,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                 setChatMode('dm')
                 setNicknameError(null)
               }}
-              className={`btn-seg btn-seg-sm ${chatMode === 'dm' ? 'btn-seg--on' : 'btn-seg--off'}`}
+              className={`sc-home-seg sc-home-seg--sm ${chatMode === 'dm' ? 'sc-home-seg--on' : 'sc-home-seg--off'}`}
             >
               一对一
             </button>
@@ -144,7 +142,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                 setChatMode('group')
                 setNicknameError(null)
               }}
-              className={`btn-seg btn-seg-sm ${chatMode === 'group' ? 'btn-seg--on' : 'btn-seg--off'}`}
+              className={`sc-home-seg sc-home-seg--sm ${chatMode === 'group' ? 'sc-home-seg--on' : 'sc-home-seg--off'}`}
             >
               加密群聊
             </button>
@@ -189,7 +187,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                 setTab('create')
                 setNicknameError(null)
               }}
-              className={`btn-seg btn-seg-md ${tab === 'create' ? 'btn-seg--on' : 'btn-seg--off'}`}
+              className={`sc-home-seg sc-home-seg--md ${tab === 'create' ? 'sc-home-seg--on' : 'sc-home-seg--off'}`}
             >
               {chatMode === 'group' ? '创建群' : '创建房间'}
             </button>
@@ -199,7 +197,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                 setTab('join')
                 setNicknameError(null)
               }}
-              className={`btn-seg btn-seg-md ${tab === 'join' ? 'btn-seg--on' : 'btn-seg--off'}`}
+              className={`sc-home-seg sc-home-seg--md ${tab === 'join' ? 'sc-home-seg--on' : 'sc-home-seg--off'}`}
             >
               {chatMode === 'group' ? '加入群' : '加入房间'}
             </button>
@@ -258,7 +256,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                   <button
                     type="button"
                     onClick={() => setRoomId(generateRoomId())}
-                    className="btn-subtle"
+                    className="sc-home-subtle"
                     title="重新生成房间号"
                   >
                     <RefreshCw className="w-3.5 h-3.5" /> 重新生成
@@ -279,7 +277,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
 
             <button
               type="button"
-              className="btn-cta mt-1"
+              className="sc-home-cta"
               onClick={() => attemptEnter()}
             >
               {tab === 'create'
@@ -303,7 +301,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
       </main>
 
       {/* 底部 */}
-      <footer className="relative z-10 px-6 py-4 text-center text-[11px] text-ink-600">
+      <footer className="relative z-20 px-6 py-4 text-center text-[11px] text-ink-600">
         所有数据仅在你和对方的浏览器之间传输 · 我们看不到任何内容
       </footer>
     </div>

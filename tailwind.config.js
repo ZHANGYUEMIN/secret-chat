@@ -1,6 +1,24 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  /**
+   * 在 `index.css` 的 `@layer components` 里用 `@apply` 定义的类，若未出现在任意模板字符串中，
+   * Tailwind 会认为「未使用」而不打进产物，曾导致线上有 JS class、无 CSS 规则。
+   */
+  safelist: [
+    'btn-seg',
+    'btn-seg--on',
+    'btn-seg--off',
+    'btn-seg-sm',
+    'btn-seg-md',
+    'btn-cta',
+    'btn-subtle',
+    'btn-icon-plain',
+    'btn-danger-ghost',
+    'btn-ghost-sm',
+    'btn-ghost-icon',
+    'btn-primary-icon',
+  ],
   darkMode: 'class',
   theme: {
     extend: {

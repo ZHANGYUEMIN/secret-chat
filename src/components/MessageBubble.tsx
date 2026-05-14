@@ -79,8 +79,9 @@ function FileMessage({
             {msg.name}
           </span>
           <button
+            type="button"
             onClick={handleDownload}
-            className={`shrink-0 underline-offset-2 hover:underline font-medium ${
+            className={`shrink-0 font-medium underline-offset-2 hover:underline ${
               fromMe ? 'text-ink-950' : 'text-accent-400'
             }`}
           >
@@ -134,8 +135,9 @@ function FileMessage({
       </div>
       {msg.done && msg.blobUrl && (
         <button
+          type="button"
           onClick={handleDownload}
-          className={`shrink-0 p-2 rounded-lg transition-colors ${
+          className={`shrink-0 rounded-lg p-2 transition-colors ${
             fromMe ? 'hover:bg-ink-950/15' : 'hover:bg-ink-800'
           }`}
           title="下载"

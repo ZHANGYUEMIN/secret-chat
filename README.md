@@ -61,7 +61,7 @@ npm run lint    # TypeScript 检查
 
 发布地址形如：`https://<你的用户名>.github.io/<仓库名>/`  
 
-`vite.config.ts` 使用环境变量 `VITE_BASE_PATH`（由 workflow 注入为 `/仓库名/`），与 GitHub Pages 子路径一致；本地开发默认为 `/`。
+`vite.config.ts` 默认 `base` 为相对路径 `./`，构建出的 `index.html` 会引用 `./assets/...`，在 GitHub Pages 子路径或本地打开 `dist/index.html` 时资源仍能加载。若必须挂到固定绝对路径，可设置环境变量 `VITE_BASE_PATH`（例如 `/my-app/`，须带尾部斜杠）。
 
 ---
 

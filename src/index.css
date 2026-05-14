@@ -7,6 +7,7 @@
   body,
   #root {
     height: 100%;
+    min-height: 0;
   }
   body {
     @apply antialiased bg-ink-950 text-ink-50;
@@ -43,12 +44,13 @@
     @apply hover:bg-ink-900/80 hover:border-white/[0.08] transition-colors;
   }
 
-  /* 按钮基类：触控优化、清晰焦点环 */
+  /* 按钮基类（禁用勿用 pointer-events:none，否则点击会穿透到底下图层，表现为「点了没反应」） */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 font-medium select-none touch-manipulation
+    @apply relative inline-flex cursor-pointer items-center justify-center gap-2 font-medium select-none
+           touch-manipulation
            transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out
            active:scale-[0.97]
-           disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none disabled:active:scale-100
+           disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100
            focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/55 focus-visible:ring-offset-2
            focus-visible:ring-offset-ink-950 rounded-xl;
   }
@@ -68,9 +70,9 @@
            hover:shadow-[0_0_0_1px_rgba(52,211,153,0.28),0_10px_36px_-8px_rgba(16,185,129,0.5)];
   }
 
-  /** 方形图标主按钮（发送等） */
+  /** 方形图标主按钮（发送等）— 保留内边距保证可点区域 */
   .btn-primary-icon {
-    @apply btn-primary min-w-[48px] min-h-[48px] !p-0 shrink-0;
+    @apply btn-primary min-h-[48px] min-w-[48px] shrink-0 px-3 py-3;
   }
 
   .btn-secondary {
@@ -88,7 +90,7 @@
 
   /** 仅图标的幽灵按钮（附件、返回） */
   .btn-ghost-icon {
-    @apply btn-ghost min-w-[48px] min-h-[48px] !p-0 text-ink-300 hover:text-ink-50;
+    @apply btn-ghost min-h-[48px] min-w-[48px] px-3 py-3 text-ink-300 hover:text-ink-50;
   }
 
   .btn-danger-ghost {
@@ -98,7 +100,8 @@
 
   /** 分段切换（一对一/群聊、创建/加入） */
   .btn-seg {
-    @apply w-full font-medium transition-all duration-200 ease-out rounded-lg select-none touch-manipulation
+    @apply relative z-10 w-full cursor-pointer select-none font-medium touch-manipulation
+           rounded-lg transition-all duration-200 ease-out
            focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/45 focus-visible:ring-inset
            active:scale-[0.98];
   }
@@ -117,18 +120,17 @@
 
   /** 弱样式文字按钮（重新生成等） */
   .btn-subtle {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 min-h-[36px]
-           text-[11px] font-medium text-ink-400 hover:text-accent-400 hover:bg-white/[0.06]
-           transition-colors
+    @apply relative z-10 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-1.5
+           rounded-lg px-2.5 py-2 text-[11px] font-medium text-ink-400 transition-colors
+           hover:bg-white/[0.06] hover:text-accent-400
            focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:ring-offset-2
            focus-visible:ring-offset-ink-950 active:scale-[0.98];
   }
 
   /** 顶栏返回等：无边框图标按钮 */
   .btn-icon-plain {
-    @apply inline-flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl
-           text-ink-300 hover:bg-ink-800/85 hover:text-ink-50
-           transition-colors
+    @apply relative z-10 inline-flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center
+           rounded-xl text-ink-300 transition-colors hover:bg-ink-800/85 hover:text-ink-50
            focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/45
            focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 active:scale-[0.97];
   }
@@ -165,4 +167,157 @@
 /* 高亮重点文字（单色，无多彩渐变） */
 .text-accent {
   @apply text-accent-400;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 首页关键交互：原生 CSS 兜底（不经过 @apply / @layer components）。         */
+/* 线上曾出现「JS 引用 btn-seg / btn-cta 等，但产物 CSS 中无对应规则」时，    */
+/* Preflight 把 button 设为透明底 → 只剩继承字色，看起来像「没有按钮」。    */
+/* 以下类名请与 HomePage 保持同步。                                           */
+/* -------------------------------------------------------------------------- */
+
+.sc-home-seg {
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 0.5rem;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+.sc-home-seg:active {
+  transform: scale(0.98);
+}
+.sc-home-seg:focus {
+  outline: none;
+}
+.sc-home-seg:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(16, 185, 129, 0.45);
+}
+
+.sc-home-seg--sm {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+.sc-home-seg--md {
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.sc-home-seg--on {
+  border: 1px solid transparent;
+  background-color: #fafafa;
+  color: #09090b;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.4), 0 1px 3px 0 rgb(0 0 0 / 0.3);
+}
+
+.sc-home-seg--off {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(9, 9, 11, 0.4);
+  color: #a1a1aa;
+}
+.sc-home-seg--off:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #f4f4f5;
+}
+
+.sc-home-cta {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 0.25rem;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background-color: #10b981;
+  color: #09090b;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 8px 32px -10px rgba(16, 185, 129, 0.42);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+.sc-home-cta:hover {
+  background-color: #34d399;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.28), 0 10px 36px -8px rgba(16, 185, 129, 0.5);
+}
+.sc-home-cta:active {
+  transform: scale(0.97);
+}
+.sc-home-cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  transform: none;
+}
+
+.sc-home-subtle {
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 36px;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  background-color: rgba(9, 9, 11, 0.35);
+  color: #a1a1aa;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+.sc-home-subtle:hover {
+  border-color: rgba(16, 185, 129, 0.35);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #34d399;
+}
+
+.sc-github-header {
+  display: inline-flex;
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  color: #a1a1aa;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.sc-github-header:hover {
+  background-color: rgba(39, 39, 42, 0.85);
+  color: #fafafa;
 }

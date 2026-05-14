@@ -85,9 +85,9 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
     state.status === 'handshaking'
 
   return (
-    <div className="h-full flex flex-col bg-ink-950">
+    <div className="flex h-full min-h-0 flex-col bg-ink-950">
       {/* 顶部状态条 */}
-      <header className="bg-ink-950/80 backdrop-blur-xl border-b border-white/[0.06] px-3 sm:px-5 py-3 flex items-center gap-3 z-10">
+      <header className="relative z-30 flex shrink-0 items-center gap-3 border-b border-white/[0.06] bg-ink-950/80 px-3 py-3 backdrop-blur-xl sm:px-5">
         <button
           type="button"
           onClick={() => {
@@ -149,7 +149,7 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
       </header>
 
       {chatMode === 'group' && isReady && state.members.length > 0 && (
-        <div className="px-3 sm:px-5 py-2 border-b border-white/[0.06] bg-ink-950/50 overflow-x-auto">
+        <div className="relative z-20 shrink-0 overflow-x-auto border-b border-white/[0.06] bg-ink-950/50 px-3 py-2 sm:px-5">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-[10px] text-ink-500 shrink-0 uppercase tracking-wider">成员</span>
             <div className="flex flex-wrap gap-1.5">
@@ -170,7 +170,7 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
 
       {/* 错误条 */}
       {state.error && (
-        <div className="bg-rose-500/10 border-b border-rose-500/20 px-4 py-2 text-sm text-rose-300 flex items-center gap-2 animate-fade-in">
+        <div className="relative z-20 flex shrink-0 animate-fade-in items-center gap-2 border-b border-rose-500/20 bg-rose-500/10 px-4 py-2 text-sm text-rose-300">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span className="flex-1 truncate">{state.error}</span>
         </div>
@@ -181,7 +181,7 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
         <button
           type="button"
           onClick={() => setShowSecurity((s) => !s)}
-          className="bg-accent-500/[0.06] border-b border-accent-500/15 px-4 py-2 text-xs text-accent-300 flex items-center gap-2 hover:bg-accent-500/10 transition-colors w-full text-left"
+          className="relative z-20 flex w-full shrink-0 items-center gap-2 border-b border-accent-500/15 bg-accent-500/[0.06] px-4 py-2 text-left text-xs text-accent-300 transition-colors hover:bg-accent-500/10"
         >
           <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
           <span className="flex-1">
@@ -200,22 +200,23 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
             )}
           </span>
           {showSecurity && (
-            <span
-              role="button"
+            <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation()
                 void copyCode()
               }}
-              className="text-accent-400 hover:text-accent-300 p-1"
+              className="shrink-0 rounded-lg p-1.5 text-accent-400 transition-colors hover:bg-white/10 hover:text-accent-300"
+              aria-label="复制安全码"
             >
               {codeCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            </span>
+            </button>
           )}
         </button>
       )}
 
       {/* 消息区 */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 sm:px-5 py-4">
+      <div ref={scrollRef} className="relative z-0 min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-5">
         {state.messages.length === 0 && !isConnecting && isReady && (
           <EmptyHint isGroup={chatMode === 'group'} />
         )}
@@ -262,7 +263,7 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
       {/* 底部输入区 */}
       <form
         onSubmit={handleSend}
-        className="bg-ink-950/80 backdrop-blur-xl border-t border-white/[0.06] p-3 sm:p-4"
+        className="relative z-20 shrink-0 border-t border-white/[0.06] bg-ink-950/90 p-3 backdrop-blur-xl sm:p-4"
       >
         <div className="max-w-3xl mx-auto flex items-end gap-2">
           <button
@@ -359,7 +360,7 @@ export function ChatRoom({ state, actions, roomId, myNickname, isHost, chatMode,
             onClick={() => {
               if (confirm('清空所有消息？此操作不可撤销。')) actions.burnAll()
             }}
-            className="hover:text-rose-400 transition-colors"
+            className="btn-danger-ghost !min-h-0 px-2 py-1 text-[11px]"
           >
             立即销毁
           </button>
@@ -436,7 +437,7 @@ function ConnectingHint({
                 {roomId}
               </div>
             </div>
-            <button onClick={onCopyLink} className="btn-primary w-full">
+            <button type="button" onClick={onCopyLink} className="btn-primary w-full">
               {linkCopied ? (
                 <>
                   <Check className="w-4 h-4" /> 链接已复制
