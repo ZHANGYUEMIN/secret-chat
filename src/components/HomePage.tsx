@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Lock, ShieldCheck, Zap, Eye, ArrowRight, RefreshCw } from 'lucide-react'
+import { Lock, ShieldCheck, Zap, Eye, ArrowRight, RefreshCw, Users, Github } from 'lucide-react'
 import { generateRoomId } from '../lib/crypto'
 import { MAX_GROUP_MEMBERS } from '../lib/group-peer'
 import type { ChatMode } from '../hooks/useChat'
@@ -93,12 +93,14 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
           </div>
         </div>
         <a
-          href="https://github.com"
+          href="https://github.com/ZHANGYUEMIN/secret-chat"
           target="_blank"
-          rel="noreferrer"
-          className="text-xs text-ink-500 hover:text-ink-200 transition-colors"
+          rel="noopener noreferrer"
+          className="btn-icon-plain text-ink-400 hover:text-ink-50"
+          aria-label="在 GitHub 上查看源码"
+          title="GitHub 源码仓库"
         >
-          开源 ↗
+          <Github className="w-[22px] h-[22px]" strokeWidth={2} />
         </a>
       </header>
 
@@ -132,11 +134,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                 setChatMode('dm')
                 setNicknameError(null)
               }}
-              className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                chatMode === 'dm'
-                  ? 'bg-ink-50 text-ink-950 shadow-soft'
-                  : 'text-ink-400 hover:text-ink-100'
-              }`}
+              className={`btn-seg btn-seg-sm ${chatMode === 'dm' ? 'btn-seg--on' : 'btn-seg--off'}`}
             >
               一对一
             </button>
@@ -146,19 +144,41 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                 setChatMode('group')
                 setNicknameError(null)
               }}
-              className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                chatMode === 'group'
-                  ? 'bg-ink-50 text-ink-950 shadow-soft'
-                  : 'text-ink-400 hover:text-ink-100'
-              }`}
+              className={`btn-seg btn-seg-sm ${chatMode === 'group' ? 'btn-seg--on' : 'btn-seg--off'}`}
             >
               加密群聊
             </button>
           </div>
           {chatMode === 'group' && (
-            <p className="text-[11px] text-ink-500 mb-3 text-center">
-              主持人转发密文 · 最多 {MAX_GROUP_MEMBERS} 人 · 全员同一套群密钥
-            </p>
+            <div
+              role="note"
+              className="mb-3 rounded-xl border-2 border-accent-500/55 bg-gradient-to-br from-accent-500/20 via-accent-500/10 to-transparent px-4 py-3.5 shadow-[0_0_32px_-10px_rgba(16,185,129,0.45)]"
+            >
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-accent-500/25 ring-1 ring-accent-400/40">
+                  <Users className="h-4 w-4 text-accent-300" strokeWidth={2.25} />
+                </div>
+                <div className="min-w-0 text-left">
+                  <p className="text-[13px] font-semibold text-accent-200 tracking-tight mb-1.5">
+                    加密群聊 · 请先看这三点
+                  </p>
+                  <ul className="space-y-1.5 text-[12px] leading-snug text-ink-100">
+                    <li>
+                      <span className="font-semibold text-accent-300">主持人只转发密文</span>
+                      <span className="text-ink-400"> — 信令/P2P 链路上是 AES 加密后的数据包</span>
+                    </li>
+                    <li>
+                      <span className="font-semibold text-accent-300">最多 {MAX_GROUP_MEMBERS} 人</span>
+                      <span className="text-ink-400"> — 星型连接，每人只连主持人</span>
+                    </li>
+                    <li>
+                      <span className="font-semibold text-accent-300">全员同一套群密钥</span>
+                      <span className="text-ink-400"> — 进群后每人本地持有同一把 AES-256 密钥</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Tab 切换 */}
@@ -169,11 +189,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                 setTab('create')
                 setNicknameError(null)
               }}
-              className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                tab === 'create'
-                  ? 'bg-ink-50 text-ink-950 shadow-soft'
-                  : 'text-ink-400 hover:text-ink-100'
-              }`}
+              className={`btn-seg btn-seg-md ${tab === 'create' ? 'btn-seg--on' : 'btn-seg--off'}`}
             >
               {chatMode === 'group' ? '创建群' : '创建房间'}
             </button>
@@ -183,11 +199,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                 setTab('join')
                 setNicknameError(null)
               }}
-              className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                tab === 'join'
-                  ? 'bg-ink-50 text-ink-950 shadow-soft'
-                  : 'text-ink-400 hover:text-ink-100'
-              }`}
+              className={`btn-seg btn-seg-md ${tab === 'join' ? 'btn-seg--on' : 'btn-seg--off'}`}
             >
               {chatMode === 'group' ? '加入群' : '加入房间'}
             </button>
@@ -246,10 +258,10 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
                   <button
                     type="button"
                     onClick={() => setRoomId(generateRoomId())}
-                    className="text-[11px] text-ink-400 hover:text-accent-400 transition-colors flex items-center gap-1"
-                    title="重新生成"
+                    className="btn-subtle"
+                    title="重新生成房间号"
                   >
-                    <RefreshCw className="w-3 h-3" /> 重新生成
+                    <RefreshCw className="w-3.5 h-3.5" /> 重新生成
                   </button>
                 )}
               </div>
@@ -267,7 +279,7 @@ export function HomePage({ initialRoomId, initialChatKind = 'dm', onEnter }: Pro
 
             <button
               type="button"
-              className="btn-primary w-full text-[15px] py-3 mt-2"
+              className="btn-cta mt-1"
               onClick={() => attemptEnter()}
             >
               {tab === 'create'
